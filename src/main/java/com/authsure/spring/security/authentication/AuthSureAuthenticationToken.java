@@ -5,6 +5,7 @@ import org.springframework.security.core.GrantedAuthority;
 
 import java.io.Serializable;
 import java.util.Collection;
+import java.util.Date;
 
 /**
  * Represents a successful AuthSure <code>Authentication</code>.
@@ -12,6 +13,12 @@ import java.util.Collection;
  * @author Erik R. Jensen
  */
 public class AuthSureAuthenticationToken extends AbstractAuthenticationToken implements Serializable {
+
+	private Date expiration;
+
+	public boolean isExpired() {
+		return expiration != null && expiration.before(new Date());
+	}
 
 	public AuthSureAuthenticationToken(final Collection<? extends GrantedAuthority> authorities) {
 		super(authorities);

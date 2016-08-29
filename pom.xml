@@ -16,11 +16,19 @@
 		<java.version>1.7</java.version>
 
 		<!-- Dependency Versions - Alphabetical Order -->
+		<commons-logging.version>1.2</commons-logging.version>
 		<servlet.version>3.0.1</servlet.version>
 		<spring-security.version>4.1.1.RELEASE</spring-security.version>
 	</properties>
 
 	<dependencies>
+		<dependency>
+			<groupId>commons-logging</groupId>
+			<artifactId>commons-logging</artifactId>
+			<version>${commons-logging.version}</version>
+			<scope>compile</scope>
+			<optional>true</optional>
+		</dependency>
 		<dependency>
 			<groupId>javax.servlet</groupId>
 			<artifactId>javax.servlet-api</artifactId>
