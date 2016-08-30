@@ -1,5 +1,7 @@
 package com.authsure.spring.security.authentication;
 
+import com.authsure.client.AuthSureClient;
+import com.authsure.client.AuthSureLogin;
 import com.authsure.spring.security.web.AuthSureAuthenticationFilter;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.MessageSource;
@@ -15,6 +17,8 @@ import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestTemplate;
 
+import java.io.IOException;
+
 /**
  * Processes an AuthSureAuthenticationToken.
  *
@@ -23,8 +27,12 @@ import org.springframework.web.client.RestTemplate;
 public class AuthSureAuthenticationProvider implements AuthenticationProvider,
 		InitializingBean, MessageSourceAware {
 
-	protected String flowUrl;
+	protected AuthSureClient client;
 	protected MessageSourceAccessor messages = SpringSecurityMessageSource.getAccessor();
+
+	public AuthSureAuthenticationProvider(AuthSureClient client) {
+		this.client = client;
+	}
 
 	/**
 	 * Initializes the AuthSureAuthenticationProvider after the BeanFactory has set all the properties.
@@ -32,7 +40,7 @@ public class AuthSureAuthenticationProvider implements AuthenticationProvider,
 	 * @throws Exception if a misconfiguration occurs
 	 */
 	public void afterPropertiesSet() throws Exception {
-		Assert.notNull(this.flowUrl, "The flowUrl must be specified");
+		// TODO If we don't need me, remove me and kill InitializingBean inheritance
 	}
 
 	public void setMessageSource(MessageSource messageSource) {
@@ -46,8 +54,12 @@ public class AuthSureAuthenticationProvider implements AuthenticationProvider,
 				&& AuthSureAuthenticationFilter.AS_IDENTIFIER.equals(authentication.getPrincipal().toString())) {
 			String token = authentication.getCredentials().toString();
 			if (StringUtils.hasText(token)) {
-				RestTemplate restTemplate = new RestTemplate();
-				
+				try {
+					AuthSureLogin login = client.validateLogin(token);
+					return new AuthSureAuthenticationToken(login);
+				} catch (IOException x) {
+					throw new BadCredentialsException("Token validation failed: " + x.getMessage(), x);
+				}
 			}
 		}
 

@@ -1,11 +1,15 @@
 package com.authsure.spring.security.authentication;
 
+import com.authsure.client.AuthSureLogin;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
+import java.util.List;
 
 /**
  * Represents a successful AuthSure <code>Authentication</code>.
@@ -14,24 +18,31 @@ import java.util.Date;
  */
 public class AuthSureAuthenticationToken extends AbstractAuthenticationToken implements Serializable {
 
-	private Date expiration;
+	protected AuthSureLogin login;
 
-	public boolean isExpired() {
-		return expiration != null && expiration.before(new Date());
+	protected static List<GrantedAuthority> getAuthorities(AuthSureLogin login) {
+		List<String> perms = login.getIdentity().getEffectivePermissions();
+		List<GrantedAuthority> grantedAuthorities = new ArrayList<>(perms.size());
+		for (String perm : perms) {
+			grantedAuthorities.add(new SimpleGrantedAuthority(perm));
+		}
+		return grantedAuthorities;
 	}
 
-	public AuthSureAuthenticationToken(final Collection<? extends GrantedAuthority> authorities) {
-		super(authorities);
-		// TODO Implement me!
+	public AuthSureAuthenticationToken(AuthSureLogin login) {
+		super(getAuthorities(login));
+		this.login = login;
+	}
+
+	public boolean isExpired() {
+		return login.isExpired();
 	}
 
 	public Object getCredentials() {
-		// TODO Implement me!
 		return null;
 	}
 
 	public Object getPrincipal() {
-		// TODO Implement me!
-		return null;
+		return login;
 	}
 }
