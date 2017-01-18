@@ -4,8 +4,8 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.authentication.AbstractAuthenticationProcessingFilter;
+import org.springframework.util.Assert;
 
-import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -19,40 +19,50 @@ import java.io.IOException;
 public class AuthSureAuthenticationFilter extends AbstractAuthenticationProcessingFilter {
 
 	public static final String AS_IDENTIFIER = "__authsure__";
+	private static final String ENDPOINT = "/login/authsure";
 
+	/**
+	 * Creates a new AuthSureAuthenticationFilter
+	 */
 	public AuthSureAuthenticationFilter() {
-		super("/login/authsure");
+		super(ENDPOINT);
 	}
 
-	private String getToken(HttpServletRequest request) {
+	/**
+	 * Retrieves the authentication token from the HttpServletRequest.
+	 *
+	 * @param request the request
+	 * @return the token or an empty String, never null
+	 */
+	protected String getToken(HttpServletRequest request) {
 		String t = request.getParameter("t");
 		if (t == null) {
 			if (logger.isDebugEnabled()) {
-				logger.debug("Failed to obtain AuthSure token");
+				logger.debug("Failed to obtain AuthSure token from request");
 			}
 			t = "";
 		}
 		return t;
 	}
 
+	/**
+	 * Attempts authentication by creating an authentication request and passing it to the AuthenticationManager.
+	 *
+	 * @param request the request
+	 * @param response the response
+	 * @return the Authentication object from the AuthenticationManager
+	 *
+	 * @throws AuthenticationException if an error occurs
+	 * @throws IOException if an I/O error occurs
+	 * @throws ServletException if an error occurrs
+	 */
 	public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response)
 			throws AuthenticationException, IOException, ServletException {
+		Assert.notNull(this.getAuthenticationManager(), "AuthenticationManager may not be null");
 		String token = getToken(request);
 		assert token != null;
 		UsernamePasswordAuthenticationToken authRequest = new UsernamePasswordAuthenticationToken(AS_IDENTIFIER, token);
 		authRequest.setDetails(authenticationDetailsSource.buildDetails(request));
 		return this.getAuthenticationManager().authenticate(authRequest);
-	}
-
-	@Override
-	protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain, Authentication authResult) throws IOException, ServletException {
-		// TODO Implement me!
-		super.successfulAuthentication(request, response, chain, authResult);
-	}
-
-	@Override
-	protected void unsuccessfulAuthentication(HttpServletRequest request, HttpServletResponse response, AuthenticationException failed) throws IOException, ServletException {
-		// TODO Implement me!
-		super.unsuccessfulAuthentication(request, response, failed);
 	}
 }

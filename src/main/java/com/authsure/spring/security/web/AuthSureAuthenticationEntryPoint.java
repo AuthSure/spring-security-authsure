@@ -1,9 +1,11 @@
 package com.authsure.spring.security.web;
 
+import com.authsure.client.AuthSureClient;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -22,7 +24,28 @@ import java.io.IOException;
  */
 public class AuthSureAuthenticationEntryPoint implements AuthenticationEntryPoint, InitializingBean {
 
-	protected String flowUrl;
+	protected String flow;
+	protected AuthSureClient client;
+
+	/**
+	 * Creates a new AuthSureAuthenticationEntryPoint assuming the default authentication flow.
+	 *
+	 * @param client the AuthSureClient
+	 */
+	public AuthSureAuthenticationEntryPoint(AuthSureClient client) {
+		this.client = client;
+	}
+
+	/**
+	 * Creates a new AuthSureAuthenticationEntryPoint using the given authentication flow.
+	 *
+	 * @param client the AuthSureClient
+	 * @param flow the authentication flow to use
+	 */
+	public AuthSureAuthenticationEntryPoint(AuthSureClient client, String flow) {
+		this(client);
+		this.flow = flow;
+	}
 
 	/**
 	 * Initializes the AuthSureAuthenticationEntryPoint after the BeanFactory has set all the properties.
@@ -30,7 +53,7 @@ public class AuthSureAuthenticationEntryPoint implements AuthenticationEntryPoin
 	 * @throws Exception if a misconfiguration occurs
 	 */
 	public void afterPropertiesSet() throws Exception { // From InitializingBean
-		Assert.notNull(this.flowUrl, "the flowUrl must be specified");
+		Assert.notNull(this.client, "the AuthSure client must be provided");
 	}
 
 	/**
@@ -38,12 +61,12 @@ public class AuthSureAuthenticationEntryPoint implements AuthenticationEntryPoin
 	 *
 	 * @param request the HTTP request
 	 * @param response the HTTP response
-	 * @param e the authentication exception that cuased the invocation
+	 * @param e the authentication exception that caused the invocation
 	 * @throws IOException if an I/O error occurs
 	 * @throws ServletException of an error occurs
 	 */
 	public void commence(HttpServletRequest request, HttpServletResponse response, AuthenticationException e)
 			throws IOException, ServletException {
-		response.sendRedirect(flowUrl);
+		response.sendRedirect(client.getUrl() + "/" + (StringUtils.hasText(flow) ? flow : ""));
 	}
 }

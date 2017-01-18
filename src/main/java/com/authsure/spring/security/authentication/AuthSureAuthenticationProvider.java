@@ -24,12 +24,16 @@ import java.io.IOException;
  *
  * @author Erik R. Jensen
  */
-public class AuthSureAuthenticationProvider implements AuthenticationProvider,
-		InitializingBean, MessageSourceAware {
+public class AuthSureAuthenticationProvider implements AuthenticationProvider, InitializingBean, MessageSourceAware {
 
 	protected AuthSureClient client;
 	protected MessageSourceAccessor messages = SpringSecurityMessageSource.getAccessor();
 
+	/**
+	 * Creates a new AuthSureAuthenticationProvider instance.
+	 *
+	 * @param client the AuthSureClient to be used by the provider
+	 */
 	public AuthSureAuthenticationProvider(AuthSureClient client) {
 		this.client = client;
 	}
@@ -40,7 +44,8 @@ public class AuthSureAuthenticationProvider implements AuthenticationProvider,
 	 * @throws Exception if a misconfiguration occurs
 	 */
 	public void afterPropertiesSet() throws Exception {
-		// TODO If we don't need me, remove me and kill InitializingBean inheritance
+		Assert.notNull(client, "An AuthSureClient must be set");
+		Assert.notNull(messages, "A message source must be set");
 	}
 
 	public void setMessageSource(MessageSource messageSource) {
@@ -56,7 +61,7 @@ public class AuthSureAuthenticationProvider implements AuthenticationProvider,
 			if (StringUtils.hasText(token)) {
 				try {
 					AuthSureLogin login = client.validateLogin(token);
-					return new AuthSureAuthenticationToken(login);
+					return new AuthSureAuthenticationToken(new AuthSureUserDetails(login));
 				} catch (IOException x) {
 					throw new BadCredentialsException("Token validation failed: " + x.getMessage(), x);
 				}
