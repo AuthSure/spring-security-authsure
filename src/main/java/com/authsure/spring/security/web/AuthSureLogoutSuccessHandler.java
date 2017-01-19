@@ -11,6 +11,8 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
 /**
+ * Redirects the user to AuthSure after a successful logout to invalidate the user's session.
+ *
  * @author Erik R. Jensen
  */
 public class AuthSureLogoutSuccessHandler implements LogoutSuccessHandler {

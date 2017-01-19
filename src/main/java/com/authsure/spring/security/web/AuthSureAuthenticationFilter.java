@@ -1,10 +1,14 @@
 package com.authsure.spring.security.web;
 
+import com.authsure.client.AuthSureClient;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.authentication.AbstractAuthenticationProcessingFilter;
+import org.springframework.security.web.authentication.AuthenticationFailureHandler;
+import org.springframework.security.web.authentication.SimpleUrlAuthenticationFailureHandler;
 import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -19,13 +23,34 @@ import java.io.IOException;
 public class AuthSureAuthenticationFilter extends AbstractAuthenticationProcessingFilter {
 
 	public static final String AS_IDENTIFIER = "__authsure__";
-	private static final String ENDPOINT = "/login/authsure";
+	protected static final String ENDPOINT = "/login/authsure";
+
+	protected AuthSureClient client;
 
 	/**
 	 * Creates a new AuthSureAuthenticationFilter
+	 *
+	 * @param client the AuthSureClient
 	 */
-	public AuthSureAuthenticationFilter() {
+	public AuthSureAuthenticationFilter(AuthSureClient client) {
 		super(ENDPOINT);
+		this.client = client;
+		this.setAuthenticationFailureHandler(new SimpleUrlAuthenticationFailureHandler(
+				client.getUrl() + "?s=failure"));
+	}
+
+	/**
+	 * Creates a new AuthSureAuthenticationFilter
+	 *
+	 * @param client the AuthSureClient
+	 * @param flow the flow name
+	 */
+	public AuthSureAuthenticationFilter(AuthSureClient client, String flow) {
+		super(ENDPOINT);
+		this.client = client;
+		this.setAuthenticationFailureHandler(new SimpleUrlAuthenticationFailureHandler(
+				client.getUrl() + "/" + (StringUtils.hasText(flow) ? flow : "") + "?s=failure"));
+
 	}
 
 	/**
