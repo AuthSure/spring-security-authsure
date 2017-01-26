@@ -2,7 +2,9 @@ package com.authsure.spring.security.authentication;
 
 import com.authsure.client.AuthSureClient;
 import com.authsure.client.AuthSureLogin;
+import com.authsure.client.exception.AuthSureAuthenticationFailedException;
 import com.authsure.spring.security.web.AuthSureAuthenticationFilter;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.MessageSource;
 import org.springframework.context.MessageSourceAware;
@@ -24,6 +26,7 @@ import java.io.IOException;
  *
  * @author Erik R. Jensen
  */
+@Slf4j
 public class AuthSureAuthenticationProvider implements AuthenticationProvider, InitializingBean, MessageSourceAware {
 
 	protected AuthSureClient client;
@@ -62,7 +65,11 @@ public class AuthSureAuthenticationProvider implements AuthenticationProvider, I
 				try {
 					AuthSureLogin login = client.validateLogin(token);
 					return new AuthSureAuthenticationToken(new AuthSureUserDetails(login));
-				} catch (IOException x) {
+				} catch (AuthSureAuthenticationFailedException x) {
+					log.error("Authentication to the AuthSure API for token validation failed: " + x.getMessage(), x);
+					throw new BadCredentialsException("Token validation failed: " + x.getMessage(), x);
+				}
+				catch (IOException x) {
 					throw new BadCredentialsException("Token validation failed: " + x.getMessage(), x);
 				}
 			}

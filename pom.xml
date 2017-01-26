@@ -21,7 +21,9 @@
 		<!-- Dependency Versions - Alphabetical Order -->
 		<authsure-client.version>0.0.1-SNAPSHOT</authsure-client.version>
 		<commons-logging.version>1.2</commons-logging.version>
+		<lombok.version>1.16.12</lombok.version>
 		<servlet.version>3.0.1</servlet.version>
+		<slf4j.version>1.7.21</slf4j.version>
 		<spring-security.version>4.1.1.RELEASE</spring-security.version>
 	</properties>
 
@@ -45,10 +47,21 @@
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
+			<groupId>org.projectlombok</groupId>
+			<artifactId>lombok</artifactId>
+			<version>${lombok.version}</version>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
 			<groupId>org.springframework.security</groupId>
 			<artifactId>spring-security-core</artifactId>
 			<version>${spring-security.version}</version>
 			<scope>compile</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-api</artifactId>
+			<version>${slf4j.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.security</groupId>
