@@ -36,7 +36,7 @@ public class AuthSureAuthenticationFilter extends AbstractAuthenticationProcessi
 		super(ENDPOINT);
 		this.client = client;
 		this.setAuthenticationFailureHandler(new SimpleUrlAuthenticationFailureHandler(
-				client.getUrl() + "?s=failure"));
+				client.getUrl() + "/failure"));
 	}
 
 	/**
@@ -49,7 +49,7 @@ public class AuthSureAuthenticationFilter extends AbstractAuthenticationProcessi
 		super(ENDPOINT);
 		this.client = client;
 		this.setAuthenticationFailureHandler(new SimpleUrlAuthenticationFailureHandler(
-				client.getUrl() + "/" + (StringUtils.hasText(flow) ? flow : "") + "?s=failure"));
+				client.getUrl() + "/" + (StringUtils.hasText(flow) ? flow : "") + "/failure"));
 
 	}
 
