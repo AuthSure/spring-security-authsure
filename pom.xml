@@ -11,6 +11,7 @@
 	<name>spring-security-authsure</name>
 	<description>spring-security-authsure</description>
 
+
 	<properties>
 		<!-- Build Settings -->
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
