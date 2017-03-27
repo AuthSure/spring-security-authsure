@@ -61,9 +61,15 @@ public class AuthSureAuthenticationProvider implements AuthenticationProvider, I
 		if (authentication instanceof UsernamePasswordAuthenticationToken
 				&& AuthSureAuthenticationFilter.AS_IDENTIFIER.equals(authentication.getPrincipal().toString())) {
 			String token = authentication.getCredentials().toString();
+			if (log.isTraceEnabled()) {
+				log.trace("Validating token: " + token);
+			}
 			if (StringUtils.hasText(token)) {
 				try {
 					AuthSureLogin login = client.validateLogin(token);
+					if (log.isTraceEnabled()) {
+						log.trace("Validated login: " + login.toString());
+					}
 					return new AuthSureAuthenticationToken(new AuthSureUserDetails(login));
 				} catch (AuthSureAuthenticationFailedException x) {
 					log.error("Authentication to the AuthSure API for token validation failed: " + x.getMessage(), x);

@@ -10,6 +10,7 @@ import org.springframework.security.web.authentication.SimpleUrlAuthenticationFa
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
+import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -89,5 +90,12 @@ public class AuthSureAuthenticationFilter extends AbstractAuthenticationProcessi
 		UsernamePasswordAuthenticationToken authRequest = new UsernamePasswordAuthenticationToken(AS_IDENTIFIER, token);
 		authRequest.setDetails(authenticationDetailsSource.buildDetails(request));
 		return this.getAuthenticationManager().authenticate(authRequest);
+	}
+
+	@Override
+	protected void successfulAuthentication(HttpServletRequest req, HttpServletResponse res, FilterChain chain,
+			Authentication result) throws IOException, ServletException {
+		super.successfulAuthentication(req, res, chain, result);
+		// TODO Set Auth-Token response header for use on subsequent auth requests when in stateless mode
 	}
 }
