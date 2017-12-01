@@ -11,57 +11,59 @@ import java.util.List;
 import java.util.Set;
 
 /**
+ * Holds user account details and roles.
+ *
  * @author Erik R. Jensen
  */
 public class AuthSureUserDetails implements UserDetails {
 
-	protected AuthSureLogin login;
+  protected AuthSureLogin login;
 
-	public AuthSureUserDetails(AuthSureLogin login) {
-		this.login = login;
-	}
+  public AuthSureUserDetails(AuthSureLogin login) {
+    this.login = login;
+  }
 
-	public AuthSureLogin getLogin() {
-		return login;
-	}
+  public AuthSureLogin getLogin() {
+    return login;
+  }
 
-	@Override
-	public Collection<? extends GrantedAuthority> getAuthorities() {
-		Set<String> perms = login.getIdentity().getEffectivePermissions();
-		List<GrantedAuthority> grantedAuthorities = new ArrayList<>(perms.size());
-		for (String perm : perms) {
-			grantedAuthorities.add(new SimpleGrantedAuthority(perm));
-		}
-		return grantedAuthorities;
-	}
+  @Override
+  public Collection<? extends GrantedAuthority> getAuthorities() {
+    Set<String> perms = login.getIdentity().getEffectivePermissions();
+    List<GrantedAuthority> grantedAuthorities = new ArrayList<>(perms.size());
+    for (String perm : perms) {
+      grantedAuthorities.add(new SimpleGrantedAuthority(perm));
+    }
+    return grantedAuthorities;
+  }
 
-	@Override
-	public String getPassword() {
-		return null;
-	}
+  @Override
+  public String getPassword() {
+    return null;
+  }
 
-	@Override
-	public String getUsername() {
-		return login.getName();
-	}
+  @Override
+  public String getUsername() {
+    return login.getName();
+  }
 
-	@Override
-	public boolean isAccountNonExpired() {
-		return !login.isExpired();
-	}
+  @Override
+  public boolean isAccountNonExpired() {
+    return !login.isExpired();
+  }
 
-	@Override
-	public boolean isAccountNonLocked() {
-		return true;
-	}
+  @Override
+  public boolean isAccountNonLocked() {
+    return true;
+  }
 
-	@Override
-	public boolean isCredentialsNonExpired() {
-		return true;
-	}
+  @Override
+  public boolean isCredentialsNonExpired() {
+    return true;
+  }
 
-	@Override
-	public boolean isEnabled() {
-		return true;
-	}
+  @Override
+  public boolean isEnabled() {
+    return true;
+  }
 }

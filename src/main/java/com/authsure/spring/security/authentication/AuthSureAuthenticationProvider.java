@@ -26,76 +26,79 @@ import java.io.IOException;
  * @author Erik R. Jensen
  */
 @Slf4j
-public class AuthSureAuthenticationProvider implements AuthenticationProvider, InitializingBean, MessageSourceAware {
+public class AuthSureAuthenticationProvider
+    implements AuthenticationProvider, InitializingBean, MessageSourceAware {
 
-	protected AuthSureClient client;
-	protected MessageSourceAccessor messages = SpringSecurityMessageSource.getAccessor();
+  protected AuthSureClient client;
+  protected MessageSourceAccessor messages = SpringSecurityMessageSource.getAccessor();
 
-	/**
-	 * Creates a new AuthSureAuthenticationProvider instance.
-	 *
-	 * @param client the AuthSureClient to be used by the provider
-	 */
-	public AuthSureAuthenticationProvider(AuthSureClient client) {
-		this.client = client;
-	}
+  /**
+   * Creates a new AuthSureAuthenticationProvider instance.
+   *
+   * @param client the AuthSureClient to be used by the provider
+   */
+  public AuthSureAuthenticationProvider(AuthSureClient client) {
+    this.client = client;
+  }
 
-	/**
-	 * Initializes the AuthSureAuthenticationProvider after the BeanFactory has set all the properties.
-	 *
-	 * @throws Exception if a misconfiguration occurs
-	 */
-	public void afterPropertiesSet() throws Exception {
-		Assert.notNull(client, "An AuthSureClient must be set");
-		Assert.notNull(messages, "A message source must be set");
-	}
+  /**
+   * Initializes the AuthSureAuthenticationProvider after the BeanFactory has set all the
+   * properties.
+   *
+   * @throws Exception if a misconfiguration occurs
+   */
+  public void afterPropertiesSet() throws Exception {
+    Assert.notNull(client, "An AuthSureClient must be set");
+    Assert.notNull(messages, "A message source must be set");
+  }
 
-	public void setMessageSource(MessageSource messageSource) {
-		this.messages = new MessageSourceAccessor(messageSource);
-	}
+  public void setMessageSource(MessageSource messageSource) {
+    this.messages = new MessageSourceAccessor(messageSource);
+  }
 
-	public Authentication authenticate(Authentication authentication) throws AuthenticationException {
+  public Authentication authenticate(Authentication authentication) throws AuthenticationException {
 
-		// New authentication
-		if (authentication instanceof UsernamePasswordAuthenticationToken
-				&& AuthSureAuthenticationFilter.AS_IDENTIFIER.equals(authentication.getPrincipal().toString())) {
-			String token = authentication.getCredentials().toString();
-			if (log.isTraceEnabled()) {
-				log.trace("Validating token: " + token);
-			}
-			if (StringUtils.hasText(token)) {
-				try {
-					AuthSureLogin login = client.validateLogin(token);
-					if (log.isTraceEnabled()) {
-						log.trace("Validated login: " + login.toString());
-					}
-					return new AuthSureAuthenticationToken(new AuthSureUserDetails(login));
-				} catch (AuthSureAuthenticationFailedException x) {
-					log.error("Authentication to the AuthSure API for token validation failed: " + x.getMessage(), x);
-					throw new BadCredentialsException("Token validation failed: " + x.getMessage(), x);
-				}
-				catch (IOException x) {
-					throw new BadCredentialsException("Token validation failed: " + x.getMessage(), x);
-				}
-			}
-		}
+    // New authentication
+    if (authentication instanceof UsernamePasswordAuthenticationToken
+        && AuthSureAuthenticationFilter.AS_IDENTIFIER.equals(
+            authentication.getPrincipal().toString())) {
+      String token = authentication.getCredentials().toString();
+      if (log.isTraceEnabled()) {
+        log.trace("Validating token: " + token);
+      }
+      if (StringUtils.hasText(token)) {
+        try {
+          AuthSureLogin login = client.validateLogin(token);
+          if (log.isTraceEnabled()) {
+            log.trace("Validated login: " + login.toString());
+          }
+          return new AuthSureAuthenticationToken(new AuthSureUserDetails(login));
+        } catch (AuthSureAuthenticationFailedException x) {
+          log.error("Authentication to the AuthSure API for token validation failed: "
+              + x.getMessage(), x);
+          throw new BadCredentialsException("Token validation failed: " + x.getMessage(), x);
+        } catch (IOException x) {
+          throw new BadCredentialsException("Token validation failed: " + x.getMessage(), x);
+        }
+      }
+    }
 
-		// Existing authentication
-		if (authentication instanceof AuthSureAuthenticationToken) {
-			AuthSureAuthenticationToken token = (AuthSureAuthenticationToken)authentication;
-			if (token.isExpired()) {
-				throw new BadCredentialsException(messages.getMessage(
-						"AuthSureAuthenticationProvider.expired",
-						"The AuthSure session has expired"));
-			}
-			return authentication;
-		}
+    // Existing authentication
+    if (authentication instanceof AuthSureAuthenticationToken) {
+      AuthSureAuthenticationToken token = (AuthSureAuthenticationToken) authentication;
+      if (token.isExpired()) {
+        throw new BadCredentialsException(messages.getMessage(
+            "AuthSureAuthenticationProvider.expired",
+            "The AuthSure session has expired"));
+      }
+      return authentication;
+    }
 
-		return null;
-	}
+    return null;
+  }
 
-	public boolean supports(final Class<?> authentication) {
-		return (UsernamePasswordAuthenticationToken.class.isAssignableFrom(authentication))
-				|| (AuthSureAuthenticationToken.class.isAssignableFrom(authentication));
-	}
+  public boolean supports(final Class<?> authentication) {
+    return (UsernamePasswordAuthenticationToken.class.isAssignableFrom(authentication))
+        || (AuthSureAuthenticationToken.class.isAssignableFrom(authentication));
+  }
 }
