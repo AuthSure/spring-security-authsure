@@ -5,16 +5,15 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.authentication.AbstractAuthenticationProcessingFilter;
-import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationFailureHandler;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
+import java.io.IOException;
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
 
 /**
  * Processes AuthSure authentication callbacks.
@@ -23,79 +22,85 @@ import java.io.IOException;
  */
 public class AuthSureAuthenticationFilter extends AbstractAuthenticationProcessingFilter {
 
-	public static final String AS_IDENTIFIER = "__authsure__";
-	protected static final String ENDPOINT = "/login/authsure";
+  public static final String AS_IDENTIFIER = "__authsure__";
+  protected static final String ENDPOINT = "/login/authsure";
 
-	protected AuthSureClient client;
+  protected AuthSureClient client;
 
-	/**
-	 * Creates a new AuthSureAuthenticationFilter
-	 *
-	 * @param client the AuthSureClient
-	 */
-	public AuthSureAuthenticationFilter(AuthSureClient client) {
-		super(ENDPOINT);
-		this.client = client;
-		this.setAuthenticationFailureHandler(new SimpleUrlAuthenticationFailureHandler(
-				client.getUrl() + "/failure"));
-	}
+  /**
+   * Creates a new AuthSureAuthenticationFilter.
+   *
+   * @param client the AuthSureClient
+   */
+  public AuthSureAuthenticationFilter(AuthSureClient client) {
+    super(ENDPOINT);
+    this.client = client;
+    this.setAuthenticationFailureHandler(new SimpleUrlAuthenticationFailureHandler(
+        client.getUrl() + "/failure"));
+  }
 
-	/**
-	 * Creates a new AuthSureAuthenticationFilter
-	 *
-	 * @param client the AuthSureClient
-	 * @param flow the flow name
-	 */
-	public AuthSureAuthenticationFilter(AuthSureClient client, String flow) {
-		super(ENDPOINT);
-		this.client = client;
-		this.setAuthenticationFailureHandler(new SimpleUrlAuthenticationFailureHandler(
-				client.getUrl() + "/" + (StringUtils.hasText(flow) ? flow : "") + "/failure"));
+  /**
+   * Creates a new AuthSureAuthenticationFilter.
+   *
+   * @param client the AuthSureClient
+   * @param flow   the flow name
+   */
+  public AuthSureAuthenticationFilter(AuthSureClient client, String flow) {
+    super(ENDPOINT);
+    this.client = client;
+    this.setAuthenticationFailureHandler(new SimpleUrlAuthenticationFailureHandler(
+        client.getUrl() + "/" + (StringUtils.hasText(flow) ? flow : "")
+            + "/failure"));
 
-	}
+  }
 
-	/**
-	 * Retrieves the authentication token from the HttpServletRequest.
-	 *
-	 * @param request the request
-	 * @return the token or an empty String, never null
-	 */
-	protected String getToken(HttpServletRequest request) {
-		String t = request.getParameter("t");
-		if (t == null) {
-			if (logger.isDebugEnabled()) {
-				logger.debug("Failed to obtain AuthSure token from request");
-			}
-			t = "";
-		}
-		return t;
-	}
+  /**
+   * Retrieves the authentication token from the HttpServletRequest.
+   *
+   * @param request the request
+   * @return the token or an empty String, never null
+   */
+  protected String getToken(HttpServletRequest request) {
+    String t = request.getParameter("t");
+    if (t == null) {
+      if (logger.isDebugEnabled()) {
+        logger.debug("Failed to obtain AuthSure token from request");
+      }
+      t = "";
+    }
+    return t;
+  }
 
-	/**
-	 * Attempts authentication by creating an authentication request and passing it to the AuthenticationManager.
-	 *
-	 * @param request the request
-	 * @param response the response
-	 * @return the Authentication object from the AuthenticationManager
-	 *
-	 * @throws AuthenticationException if an error occurs
-	 * @throws IOException if an I/O error occurs
-	 * @throws ServletException if an error occurrs
-	 */
-	public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response)
-			throws AuthenticationException, IOException, ServletException {
-		Assert.notNull(this.getAuthenticationManager(), "AuthenticationManager may not be null");
-		String token = getToken(request);
-		assert token != null;
-		UsernamePasswordAuthenticationToken authRequest = new UsernamePasswordAuthenticationToken(AS_IDENTIFIER, token);
-		authRequest.setDetails(authenticationDetailsSource.buildDetails(request));
-		return this.getAuthenticationManager().authenticate(authRequest);
-	}
+  /**
+   * Attempts authentication by creating an authentication request and passing it to
+   * the AuthenticationManager.
+   *
+   * @param request  the request
+   * @param response the response
+   * @return the Authentication object from the AuthenticationManager
+   * @throws AuthenticationException if an error occurs
+   * @throws IOException             if an I/O error occurs
+   * @throws ServletException        if an error occurrs
+   */
+  public Authentication attemptAuthentication(HttpServletRequest request,
+                                              HttpServletResponse response)
+      throws AuthenticationException, IOException, ServletException {
+    Assert.notNull(this.getAuthenticationManager(),
+        "AuthenticationManager may not be null");
+    String token = getToken(request);
+    assert token != null;
+    UsernamePasswordAuthenticationToken authRequest =
+        new UsernamePasswordAuthenticationToken(AS_IDENTIFIER, token);
+    authRequest.setDetails(authenticationDetailsSource.buildDetails(request));
+    return this.getAuthenticationManager().authenticate(authRequest);
+  }
 
-	@Override
-	protected void successfulAuthentication(HttpServletRequest req, HttpServletResponse res, FilterChain chain,
-			Authentication result) throws IOException, ServletException {
-		super.successfulAuthentication(req, res, chain, result);
-		// TODO Set Auth-Token response header for use on subsequent auth requests when in stateless mode
-	}
+  @Override
+  protected void successfulAuthentication(HttpServletRequest req, HttpServletResponse res,
+                                          FilterChain chain, Authentication result)
+      throws IOException, ServletException {
+    super.successfulAuthentication(req, res, chain, result);
+    // TODO Set Auth-Token response header for use on subsequent auth requests when in
+    // TODO stateless mode
+  }
 }

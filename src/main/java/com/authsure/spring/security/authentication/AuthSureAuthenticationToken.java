@@ -9,26 +9,27 @@ import java.io.Serializable;
  *
  * @author Erik R. Jensen
  */
-public class AuthSureAuthenticationToken extends AbstractAuthenticationToken implements Serializable {
+public class AuthSureAuthenticationToken extends AbstractAuthenticationToken
+    implements Serializable {
 
-	protected AuthSureUserDetails userDetails;
+  protected AuthSureUserDetails userDetails;
 
-	public AuthSureAuthenticationToken(AuthSureUserDetails userDetails) {
-		super(userDetails.getAuthorities());
-		this.userDetails = userDetails;
-	}
+  public AuthSureAuthenticationToken(AuthSureUserDetails userDetails) {
+    super(userDetails.getAuthorities());
+    this.userDetails = userDetails;
+  }
 
-	@Override
-	public Object getCredentials() {
-		return userDetails.getLogin();
-	}
+  @Override
+  public Object getCredentials() {
+    return userDetails.getLogin();
+  }
 
-	@Override
-	public Object getPrincipal() {
-		return userDetails;
-	}
+  @Override
+  public Object getPrincipal() {
+    return userDetails;
+  }
 
-	public boolean isExpired() {
-		return userDetails.getLogin().isExpired();
-	}
+  public boolean isExpired() {
+    return userDetails.getLogin().isExpired();
+  }
 }
